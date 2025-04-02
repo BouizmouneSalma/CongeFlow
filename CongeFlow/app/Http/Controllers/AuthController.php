@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-
+    
     public function login(Request $request)
     {
         $request->validate([
@@ -32,5 +32,17 @@ class AuthController extends Controller
         throw ValidationException::withMessages([
             'email' => ['Les informations d\'identification fournies sont incorrectes.'],
         ]);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Déconnexion réussie']);
+    }
+
+    public function user(Request $request)
+    {
+        return response()->json($request->user());
     }
 }
