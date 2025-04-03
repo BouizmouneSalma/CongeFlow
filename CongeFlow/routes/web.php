@@ -2,22 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Routes statiques pour afficher toutes les vues front-end
-| du système de gestion des congés
-|
-*/
-
 // Page de connexion
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-// Redirection de la page d'accueil vers la page de connexion
 Route::get('/', function () {
     return redirect()->route('login');
 });
