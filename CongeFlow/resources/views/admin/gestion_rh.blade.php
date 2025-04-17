@@ -1,9 +1,10 @@
-@extends('layouts.app')
-
-@section('title', 'Gestion des RH')
-
-@section('content')
-<div class="container mx-auto">
+<main class="container mx-auto">
+    
+    @extends('layouts.app')
+    
+    @section('title', 'Gestion des RH')
+    
+    @section('content')
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Gestion des comptes RH</h1>
         <p class="text-gray-600">Ajoutez, modifiez ou suspendez des comptes RH</p>
@@ -259,6 +260,6 @@
             Les comptes suspendus sont conservés pendant 90 jours avant suppression définitive.
         </div>
     </div>
-</div>
+</main>
 @endsection
 
