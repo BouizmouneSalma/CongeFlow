@@ -57,5 +57,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/admin/statistiques', function () {
             return view('admin.statistiques');
         })->name('admin.statistiques');
+        
+        // Routes pour la gestion des utilisateurs RH
+        Route::prefix('admin/rh')->name('admin.rh.')->group(function () {
+            Route::get('/', [App\Http\Controllers\RHController::class, 'index'])->name('index');
+            Route::get('/create', [App\Http\Controllers\RHController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\RHController::class, 'store'])->name('store');
+            Route::get('/{rh}/edit', [App\Http\Controllers\RHController::class, 'edit'])->name('edit');
+            Route::put('/{rh}', [App\Http\Controllers\RHController::class, 'update'])->name('update');
+            Route::delete('/{rh}', [App\Http\Controllers\RHController::class, 'destroy'])->name('destroy');
+        });
     });
 });
