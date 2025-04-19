@@ -54,9 +54,7 @@ Route::middleware(['auth'])->group(function () {
             return view('admin.gestion_rh');
         })->name('admin.gestion_rh');
 
-        Route::get('/admin/statistiques', function () {
-            return view('admin.statistiques');
-        })->name('admin.statistiques');
+        Route::get('/admin/statistiques', [App\Http\Controllers\StatistiquesController::class, 'index'])->name('admin.statistiques');
         
         // Routes pour la gestion des utilisateurs RH
         Route::prefix('admin/rh')->name('admin.rh.')->group(function () {
