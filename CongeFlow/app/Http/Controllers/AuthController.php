@@ -25,7 +25,7 @@ class AuthController extends Controller
             'nom' => $request->nom,
             'prenom' => $request->prenom,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
             'role' => $request->role,
             'status' => 'actif',
             'dateInscription' => Carbon::now(),
@@ -49,7 +49,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user || $user->password !== $request->password) {
             throw ValidationException::withMessages([
                 'email' => ['Les informations d\'identification fournies sont incorrectes.'],
             ]);

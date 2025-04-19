@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +14,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // admin
+        User::create([
+            'nom' => 'Admin',
+            'prenom' => 'Système',
+            'email' => 'salmabouizmoune@gmail.com',
+            'password' => Hash::make('admin123'), 
+            'role' => 'admin',
+            'status' => 'actif',
+            'dateInscription' => Carbon::now(),
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        //  RH
+        User::create([
+            'nom' => 'rh',
+            'prenom' => 'Rh',
+            'email' => 'salmabouizmoun@gmail.com',
+            'password' => Hash::make('rh123456'), 
+            'role' => 'rh',
+            'status' => 'actif',
+            'dateInscription' => Carbon::now(),
+        ]);
+
+        // salarie
+        User::create([
+            'nom' => 'salma',
+            'prenom' => 'salma',
+            'email' => 'perso1salmabouizmoune@gmail.com',
+            'password' => Hash::make('password123'),
+            'role' => 'salarie',
+            'status' => 'actif',
+            'dateInscription' => Carbon::now(),
         ]);
     }
 }

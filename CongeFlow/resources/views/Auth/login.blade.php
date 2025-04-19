@@ -20,7 +20,17 @@
                 </p>
             </div>
             
-            <form class="mt-8 space-y-6" action="#" method="POST">
+            @if ($errors->any())
+            <div class="mt-4 bg-red-50 border-l-4 border-red-500 p-4 text-red-700">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            
+            <form class="mt-8 space-y-6" action="{{ route('login') }}" method="POST">
                 @csrf
                 
                 <div class="rounded-md shadow-sm -space-y-px">
@@ -30,7 +40,7 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="fas fa-envelope text-gray-400"></i>
                             </div>
-                            <input id="email" name="email" type="email" required 
+                            <input id="email" name="email" type="email" value="{{ old('email') }}" required 
                                 class="appearance-none rounded-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
                                 placeholder="Adresse email">
                         </div>

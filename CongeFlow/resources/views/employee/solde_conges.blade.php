@@ -3,176 +3,99 @@
 @section('title', 'Solde des congés')
 
 @section('content')
-<div class="container mx-auto">
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Solde des congés</h1>
-        <p class="text-gray-600">Consultez vos soldes de congés disponibles</p>
-    </div>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Congés payés -->
-        <div class="bg-white rounded-lg shadow p-6 border-t-4 border-blue-500">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Congés payés</h3>
-                    <p class="text-sm text-gray-500">Année en cours</p>
+<div class="bg-white overflow-hidden shadow-sm rounded-lg">
+    <div class="p-6 bg-white border-b border-gray-200">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Solde de congés</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-medium text-blue-800">Congés annuels</h3>
+                    <i class="fas fa-calendar-alt text-blue-500 text-2xl"></i>
                 </div>
-                <div class="bg-blue-100 rounded-full p-2">
-                    <i class="fas fa-umbrella-beach text-blue-500"></i>
-                </div>
+                <div class="text-3xl font-bold text-blue-600">18</div>
+                <div class="text-sm text-blue-700 mt-1">jours disponibles</div>
             </div>
-            <div class="mt-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-3xl font-bold text-gray-800">18</span>
-                    <span class="text-sm text-gray-500">/ 25 jours</span>
+            
+            <div class="bg-green-50 rounded-lg p-6 border border-green-100">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-medium text-green-800">Congés pris</h3>
+                    <i class="fas fa-check-circle text-green-500 text-2xl"></i>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 72%"></div>
+                <div class="text-3xl font-bold text-green-600">5</div>
+                <div class="text-sm text-green-700 mt-1">jours utilisés cette année</div>
+            </div>
+            
+            <div class="bg-yellow-50 rounded-lg p-6 border border-yellow-100">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-lg font-medium text-yellow-800">Congés en attente</h3>
+                    <i class="fas fa-clock text-yellow-500 text-2xl"></i>
                 </div>
+                <div class="text-3xl font-bold text-yellow-600">2</div>
+                <div class="text-sm text-yellow-700 mt-1">jours en attente d'approbation</div>
             </div>
         </div>
         
-        <!-- RTT -->
-        <div class="bg-white rounded-lg shadow p-6 border-t-4 border-green-500">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">RTT</h3>
-                    <p class="text-sm text-gray-500">Année en cours</p>
-                </div>
-                <div class="bg-green-100 rounded-full p-2">
-                    <i class="fas fa-clock text-green-500"></i>
-                </div>
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-800">Détail des congés par type</h3>
             </div>
-            <div class="mt-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-3xl font-bold text-gray-800">6</span>
-                    <span class="text-sm text-gray-500">/ 12 jours</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div class="bg-green-600 h-2.5 rounded-full" style="width: 50%"></div>
-                </div>
+            <div class="p-6">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type de congé</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Droits</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisés</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Restants</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">Congé annuel payé</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">18 jours</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">5 jours</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">13 jours</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">Congé maladie</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Variable</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">0 jours</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">-</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">Congé exceptionnel</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Selon événement</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">0 jours</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">-</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        
-        <!-- Congés exceptionnels -->
-        <div class="bg-white rounded-lg shadow p-6 border-t-4 border-purple-500">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Congés exceptionnels</h3>
-                    <p class="text-sm text-gray-500">Événements familiaux</p>
-                </div>
-                <div class="bg-purple-100 rounded-full p-2">
-                    <i class="fas fa-gift text-purple-500"></i>
-                </div>
-            </div>
-            <div class="mt-4">
-                <div class="flex justify-between items-center">
-                    <span class="text-3xl font-bold text-gray-800">3</span>
-                    <span class="text-sm text-gray-500">/ 3 jours</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div class="bg-purple-600 h-2.5 rounded-full" style="width: 100%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800">Historique d'acquisition</h2>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Période
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Type
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Acquis
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Pris
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Solde
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Janvier 2023
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Congés payés
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            2.08
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            0
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            2.08
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Février 2023
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Congés payés
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            2.08
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            1
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            3.16
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Mars 2023
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Congés payés
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            2.08
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            0
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            5.24
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Avril 2023
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            RTT
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            1
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            0
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            1
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
