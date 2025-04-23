@@ -9,11 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('demande_conges', function (Blueprint $table) {
-            $table->id('idDemande');
+            $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('conge_id')->constrained('conges', 'idConge')->onDelete('cascade');
-            $table->timestamp('dateDemande');
-            $table->string('status')->default('en_attente'); // en_attente, approuve, refuse
+            $table->foreignId('type_id')->constrained('types')->onDelete('cascade');
+            $table->date('dateDebut');
+            $table->date('dateFin');
+            $table->text('motif')->nullable();
+            $table->enum('statut', ['en_attente', 'approuvee', 'refusee', 'annulee'])->default('en_attente');
+            $table->text('commentaire')->nullable();
             $table->timestamps();
         });
     }

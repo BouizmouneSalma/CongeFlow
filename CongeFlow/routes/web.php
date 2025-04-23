@@ -27,17 +27,26 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/employee/historique', function () {
             return view('employee.historique');
         })->name('employee.historique');
+        
+        // Routes pour la gestion des congés
+        Route::get('/conges', [App\Http\Controllers\CongeController::class, 'index'])->name('conges.index');
+        Route::post('/conges', [App\Http\Controllers\CongeController::class, 'store'])->name('conges.store');
+        Route::get('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'show'])->name('conges.show');
+        Route::put('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'update'])->name('conges.update');
+        Route::delete('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'destroy'])->name('conges.destroy');
+        Route::put('/conges/{demande}/cancel', [App\Http\Controllers\CongeController::class, 'cancel'])->name('conges.cancel');
+        
+        // Route Ajax pour récupérer les demandes
+        Route::get('/api/conges', [App\Http\Controllers\CongeController::class, 'getDemandes'])->name('api.conges.index');
     });
 
     // Routes pour les pages RH
     Route::middleware(['role:rh,admin'])->group(function () {
-        Route::get('/hr/gestion-conges', function () {
-            return view('hr.gestion_conges');
-        })->name('hr.gestion_conges');
-
         Route::get('/hr/gestion-salaries', function () {
             return view('hr.gestion_salaries');
         })->name('hr.gestion_salaries');
+
+        Route::get('/hr/gestion-conges', [App\Http\Controllers\CongeController::class, 'gestionConges'])->name('hr.gestion_conges');
 
         Route::get('/hr/configuration-conges', function () {
             return view('hr.configuration_conges');

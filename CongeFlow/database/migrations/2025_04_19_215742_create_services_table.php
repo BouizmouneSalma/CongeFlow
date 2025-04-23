@@ -6,20 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('types', function (Blueprint $table) {
+        Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->string('libelle');
-            $table->integer('duree_max')->nullable();
-            $table->string('couleur')->default('#3b82f6');
-            $table->text('description')->nullable();
+            $table->string('nom')->unique();
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('types');
+        Schema::dropIfExists('services');
     }
 };
