@@ -37,9 +37,6 @@
                                 <a href="{{ route('admin.statistiques') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Statistiques
                                 </a>
-                                <a href="{{ route('conges.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Gestion Congés
-                                </a>
                             @elseif(auth()->user()->role === 'rh')
                                 <a href="{{ route('hr.gestion_conges') }}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Gestion des congés

@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Routes pour les pages RH
-    Route::middleware(['role:rh,admin'])->group(function () {
+    Route::middleware(['role:rh'])->group(function () {
         Route::get('/hr/gestion-salaries', function () {
             return view('hr.gestion_salaries');
         })->name('hr.gestion_salaries');

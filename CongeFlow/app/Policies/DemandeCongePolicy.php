@@ -23,9 +23,14 @@ class DemandeCongePolicy
      */
     public function view(User $user, DemandeConge $demandeConge): bool
     {
-        // Les admins et RH peuvent voir toutes les demandes
-        if (in_array($user->role, ['admin', 'rh'])) {
+        // Seulement les RH peuvent voir toutes les demandes
+        if ($user->role === 'rh') {
             return true;
+        }
+        
+        // Les admins peuvent voir les demandes en lecture seule pour statistiques
+        if ($user->role === 'admin') {
+            return true; // Accès limité en lecture seule
         }
         
         // Les salariés ne peuvent voir que leurs propres demandes
@@ -46,9 +51,14 @@ class DemandeCongePolicy
      */
     public function update(User $user, DemandeConge $demandeConge): bool
     {
-        // Les admins et RH peuvent modifier toutes les demandes
-        if (in_array($user->role, ['admin', 'rh'])) {
+        // Seuls les RH peuvent modifier toutes les demandes
+        if ($user->role === 'rh') {
             return true;
+        }
+        
+        // Les admins n'ont pas le droit de gérer les congés
+        if ($user->role === 'admin') {
+            return false;
         }
         
         // Les salariés ne peuvent modifier que leurs propres demandes en attente
@@ -60,8 +70,8 @@ class DemandeCongePolicy
      */
     public function delete(User $user, DemandeConge $demandeConge): bool
     {
-        // Seuls les admins et RH peuvent supprimer les demandes
-        return in_array($user->role, ['admin', 'rh']);
+        // Seuls les RH peuvent supprimer les demandes
+        return $user->role === 'rh';
     }
 
     /**
@@ -87,7 +97,7 @@ class DemandeCongePolicy
      */
     public function changeStatus(User $user, DemandeConge $demandeConge): bool
     {
-        // Seuls les RH et admins peuvent changer le statut
-        return in_array($user->role, ['rh', 'admin']);
+        // Seuls les RH peuvent changer le statut
+        return $user->role === 'rh';
     }
 } 

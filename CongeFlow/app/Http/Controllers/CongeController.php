@@ -20,10 +20,17 @@ class CongeController extends Controller
         $user = Auth::user();
         $types = Type::all();
         
-        // Si c'est un RH ou admin, montrer toutes les demandes
+        // Si c'est un RH, montrer toutes les demandes
+        // Si c'est un admin, montrer les demandes uniquement pour la récupération des stats
         // Si c'est un salarié, montrer uniquement ses demandes
-        if (in_array($user->role, ['admin', 'rh'])) {
+        if ($user->role === 'rh') {
             $demandes = DemandeConge::with(['user', 'type'])->latest()->get();
+        } else if ($user->role === 'admin') {
+            // Pour les admins, accès limité aux demandes (seulement pour stats)
+            $demandes = DemandeConge::with(['user', 'type'])
+                ->select(['id', 'user_id', 'type_id', 'dateDebut', 'dateFin', 'statut', 'created_at'])
+                ->latest()
+                ->get();
         } else {
             $demandes = DemandeConge::with(['type'])->where('user_id', $user->id)->latest()->get();
         }
@@ -38,8 +45,14 @@ class CongeController extends Controller
     {
         $user = Auth::user();
         
-        if (in_array($user->role, ['admin', 'rh'])) {
+        if ($user->role === 'rh') {
             $demandes = DemandeConge::with(['user', 'type'])->latest()->get();
+        } else if ($user->role === 'admin') {
+            // Pour les admins, accès limité aux demandes (seulement pour stats)
+            $demandes = DemandeConge::with(['user', 'type'])
+                ->select(['id', 'user_id', 'type_id', 'dateDebut', 'dateFin', 'statut', 'created_at'])
+                ->latest()
+                ->get();
         } else {
             $demandes = DemandeConge::with(['type'])->where('user_id', $user->id)->latest()->get();
         }
@@ -119,8 +132,8 @@ class CongeController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
         
-        // Si c'est un RH ou admin qui change le statut
-        if (in_array(Auth::user()->role, ['admin', 'rh']) && $request->has('statut')) {
+        // Si c'est un RH qui change le statut
+        if (Auth::user()->role === 'rh' && $request->has('statut')) {
             $demande->statut = $request->statut;
             $demande->commentaire = $request->commentaire;
         } 
@@ -147,9 +160,9 @@ class CongeController extends Controller
      */
     public function gestionConges()
     {
-        // Vérifier que l'utilisateur est RH ou admin
+        // Vérifier que l'utilisateur est RH uniquement
         $user = Auth::user();
-        if (!in_array($user->role, ['rh', 'admin'])) {
+        if ($user->role !== 'rh') {
             abort(403, 'Accès non autorisé');
         }
         
