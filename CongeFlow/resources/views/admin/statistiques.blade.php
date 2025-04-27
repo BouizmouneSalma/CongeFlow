@@ -13,7 +13,7 @@
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-lg font-medium text-blue-800">Salariés</h3>
                     <i class="fas fa-users text-blue-500 text-xl"></i>
-                </div>
+    </div>
                 <div class="flex items-baseline space-x-2">
                     <div class="text-3xl font-bold text-blue-600">{{ $totalSalaries }}</div>
                     <div class="text-sm text-blue-700">utilisateurs</div>
@@ -34,9 +34,9 @@
                 </div>
                 <div class="text-xs text-green-700 mt-2">
                     {{ round(($totalRH / $totalUsers) * 100) }}% des utilisateurs
-                </div>
             </div>
-            
+        </div>
+        
             <div class="bg-purple-50 rounded-lg p-6 border border-purple-100 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-lg font-medium text-purple-800">Administrateurs</h3>
@@ -48,9 +48,9 @@
                 </div>
                 <div class="text-xs text-purple-700 mt-2">
                     {{ round(($totalAdmins / $totalUsers) * 100) }}% des utilisateurs
-                </div>
             </div>
-            
+        </div>
+        
             <div class="bg-red-50 rounded-lg p-6 border border-red-100 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-lg font-medium text-red-800">Demandes de congé</h3>
@@ -131,11 +131,11 @@
                 <div class="w-full" style="height: 300px;">
                     <canvas id="demandesChart"></canvas>
                 </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
+    
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

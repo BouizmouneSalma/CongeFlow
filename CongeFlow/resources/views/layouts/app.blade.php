@@ -25,7 +25,7 @@
                         <div class="flex-shrink-0 flex items-center">
                             <i class="fas fa-calendar-alt text-blue-600 text-2xl mr-2"></i>
                             <span class="font-bold text-gray-900 text-xl">GestionCongés</span>
-                        </div>
+                </div>
                         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                             @if(auth()->user()->role === 'admin')
                                 <a href="{{ route('admin.gestion_rh') }}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
@@ -39,20 +39,20 @@
                                 </a>
                             @elseif(auth()->user()->role === 'rh')
                                 <a href="{{ route('hr.gestion_conges') }}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Gestion des congés
-                                </a>
+                        Gestion des congés
+                    </a>
                                 <a href="{{ route('conges.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Demandes
                                 </a>
                                 <a href="{{ route('hr.gestion_salaries') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Gestion des salariés
-                                </a>
+                        Gestion des salariés
+                    </a>
                                 <a href="{{ route('hr.configuration_conges') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Configuration
-                                </a>
+                        Configuration
+                    </a>
                                 <a href="{{ route('hr.suivi_absences') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Suivi des absences
-                                </a>
+                        Suivi des absences
+                    </a>
                             @else
                                 <a href="{{ route('employee.solde') }}" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Solde de congés
@@ -88,12 +88,12 @@
             </div>
         </nav>
 
-        <!-- Page Content -->
+            <!-- Page Content -->
         <main class="flex-1 py-6">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 @yield('content')
             </div>
-        </main>
+            </main>
 
         <!-- Footer -->
         <footer class="bg-white shadow-inner">
@@ -101,7 +101,7 @@
                 <div class="text-center text-sm text-gray-500">
                     &copy; {{ date('Y') }} Système de Gestion des Congés - Tous droits réservés
                 </div>
-            </div>
+        </div>
         </footer>
     </div>
     

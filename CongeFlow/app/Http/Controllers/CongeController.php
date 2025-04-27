@@ -9,6 +9,7 @@ use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Notifications\CongeStatusChanged;
 
 class CongeController extends Controller
 {
@@ -236,5 +237,50 @@ class CongeController extends Controller
         }
         
         return redirect()->route('conges.index')->with('success', 'Demande supprimée avec succès');
+    }
+
+    public function filter(Request $request)
+    {
+        $validated = $request->validate([
+            'service_id' => 'nullable|exists:services,id',
+            'type_id' => 'nullable|exists:type_conges,id',
+            'statut' => 'nullable|in:en_attente,approuvee,refusee,annulee',
+            'search' => 'nullable|string|max:255',
+        ]);
+
+        $userId = auth()->id();
+        $user = auth()->user();
+        $isRH = $user->hasRole('rh');
+
+        $query = DemandeConge::with(['user.service', 'type'])
+            ->when($isRH, function ($query) {
+                return $query;
+            });
+
+        $query->when($request->filled('service_id'), function ($query) use ($request) {
+            return $query->whereHas('user.service', function ($q) use ($request) {
+                $q->where('id', $request->service_id);
+            });
+        })
+        ->when($request->filled('type_id'), function ($query) use ($request) {
+            return $query->where('type_id', $request->type_id);
+        })
+        ->when($request->filled('statut'), function ($query) use ($request) {
+            return $query->where('statut', $request->statut);
+        })
+        ->when($request->filled('search'), function ($query) use ($request) {
+            $search = $request->search;
+            return $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        });
+
+        $demandes = $query->latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'demandes' => $demandes
+        ]);
     }
 } 

@@ -4,6 +4,9 @@
 
 @section('content')
 <div class="container mx-auto" id="app-gestion-conges">
+    <!-- CSRF token for AJAX requests -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Gestion des congés</h1>
         <p class="text-gray-600">Approuvez ou refusez les demandes de congés des salariés</p>
@@ -366,17 +369,27 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        // URL et données pour la requête AJAX
+        let url = '';
+        let data = {};
+        
+        if (status === 'approuvee') {
+            url = `/conges/${demandeId}/approve`;
+            data = {};
+        } else if (status === 'refusee') {
+            url = `/conges/${demandeId}/reject`;
+            data = { motif_refus: commentaire };
+        }
+        
         // Appel AJAX pour mettre à jour le statut
-        fetch(`/conges/${demandeId}`, {
-            method: 'PUT',
+        fetch(url, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({
-                statut: status,
-                commentaire: commentaire
-            })
+            body: JSON.stringify(data)
         })
         .then(response => {
             if (!response.ok) {
@@ -386,6 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             // Mise à jour réussie, on rafraîchit les données
+            showNotification(data.message || 'Demande mise à jour avec succès', 'success');
             refreshData();
         })
         .catch(error => {
@@ -512,6 +526,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             <p class="text-sm font-medium text-gray-500">Commentaire</p>
                             <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${demande.commentaire}</p>
                         </div>` : ''}
+                        ${demande.motif_refus ? `
+                        <div class="col-span-2">
+                            <p class="text-sm font-medium text-gray-500">Motif de refus</p>
+                            <p class="text-sm text-gray-900 bg-red-50 p-2 rounded border border-red-100">${demande.motif_refus}</p>
+                        </div>` : ''}
                     </div>
                     ${demande.motif ? `
                     <div class="mt-4">
@@ -616,16 +635,6 @@ document.addEventListener('DOMContentLoaded', function() {
         closeRefusModal();
     });
     
-    function closeRefusModal() {
-        const modal = document.getElementById('refus-modal');
-        modal.querySelector('.bg-white').classList.remove('scale-100');
-        modal.querySelector('.bg-white').classList.add('scale-90');
-        
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
-    }
-    
     document.getElementById('confirm-refus').addEventListener('click', function() {
         const demandeId = document.getElementById('refus-demande-id').value;
         const commentaire = document.getElementById('commentaire').value;
@@ -637,11 +646,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
+            // Désactiver le bouton pendant la soumission
+            const button = this;
+            button.disabled = true;
+            button.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Traitement en cours...';
+            
             updateDemandeStatus(demandeId, 'refusee', commentaire);
             closeRefusModal();
-            showNotification('Demande refusée avec succès', 'warning');
+            
+            // Réactiver le bouton après un délai
+            setTimeout(() => {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-ban mr-2"></i> Confirmer le refus';
+            }, 2000);
         }
     });
+    
+    function closeRefusModal() {
+        const modal = document.getElementById('refus-modal');
+        modal.querySelector('.bg-white').classList.remove('scale-100');
+        modal.querySelector('.bg-white').classList.add('scale-90');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
     
     // Ajout d'une notification temporaire
     function showNotification(message, type = 'info') {
@@ -710,6 +739,214 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('confirm-refus').click();
         }
     });
+    
+    // Add specific functions for approving and rejecting requests if they don't exist
+    function approveRequest(demandeId) {
+        if (confirm('Êtes-vous sûr de vouloir approuver cette demande de congé ?')) {
+            updateDemandeStatus(demandeId, 'approuvee');
+            showNotification('Demande approuvée avec succès', 'success');
+        }
+    }
+    
+    function rejectRequest(demandeId) {
+        showRefusModal(demandeId);
+    }
+    
+    // Add event listeners for the approve and reject buttons if not already present
+    document.querySelectorAll('.btn-approve').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const demandeId = this.getAttribute('data-demande-id');
+            approveRequest(demandeId);
+        });
+    });
+    
+    document.querySelectorAll('.btn-refuse').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const demandeId = this.getAttribute('data-demande-id');
+            rejectRequest(demandeId);
+        });
+    });
+    
+    // Enhance the existing filterDemandes function
+    function filterDemandes() {
+        const serviceValue = filterService.value;
+        const typeValue = filterType.value;
+        const statutValue = filterStatut.value;
+        const searchValue = searchSalarie.value.toLowerCase();
+        
+        fetch('/api/conges/filter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                service_id: serviceValue,
+                type_id: typeValue,
+                statut: statutValue,
+                search: searchValue
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            renderDemandesTable(data.demandes);
+        })
+        .catch(error => {
+            console.error('Erreur lors du filtrage des demandes:', error);
+            applyFilters(); // Fallback to client-side filtering
+        });
+    }
+    
+    // Function to render the table with filtered data
+    function renderDemandesTable(demandes) {
+        const tableBody = document.getElementById('demandes-list');
+        
+        if (!tableBody) return;
+        
+        if (demandes.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                        Aucune demande trouvée
+                    </td>
+                </tr>
+            `;
+            updateCounter(0, 0);
+            return;
+        }
+        
+        let html = '';
+        
+        demandes.forEach(demande => {
+            const dateDebut = new Date(demande.dateDebut).toLocaleDateString('fr-FR');
+            const dateFin = new Date(demande.dateFin).toLocaleDateString('fr-FR');
+            const dateCreation = new Date(demande.created_at).toLocaleDateString('fr-FR');
+            
+            let duree = Math.ceil((new Date(demande.dateFin) - new Date(demande.dateDebut)) / (1000 * 60 * 60 * 24)) + 1;
+            
+            html += `
+                <tr data-demande-id="${demande.id}" 
+                    data-type-id="${demande.type_id}" 
+                    data-service-id="${demande.user?.service_id || ''}" 
+                    data-statut="${demande.statut}">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=${encodeURIComponent(demande.user?.name || 'User')}&background=random" alt="">
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${demande.user?.name || 'N/A'}</div>
+                                <div class="text-sm text-gray-500">${demande.user?.email || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${demande.user?.service?.nom || 'N/A'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            ${demande.type?.nom || 'N/A'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${dateDebut} - ${dateFin}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${duree} jours
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        ${formatStatus(demande.statut)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        ${dateCreation}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex justify-end space-x-2">
+                            ${demande.statut === 'en_attente' ? `
+                                <button 
+                                    class="btn-approve inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
+                                    data-demande-id="${demande.id}"
+                                    title="Approuver cette demande"
+                                >
+                                    <i class="fas fa-check mr-1"></i> Approuver
+                                </button>
+                                <button 
+                                    class="btn-refuse inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150"
+                                    data-demande-id="${demande.id}"
+                                    title="Refuser cette demande"
+                                >
+                                    <i class="fas fa-times mr-1"></i> Refuser
+                                </button>
+                            ` : ''}
+                            <button 
+                                class="btn-details inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-150"
+                                data-demande-id="${demande.id}"
+                                title="Voir les détails"
+                            >
+                                <i class="fas fa-eye mr-1"></i> Détails
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tableBody.innerHTML = html;
+        updateCounter(demandes.length, demandes.length);
+        
+        // Reattach event listeners
+        attachActionListeners();
+    }
+    
+    function formatStatus(statut) {
+        if (statut === 'approuvee') {
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Approuvée
+                </span>`;
+        } else if (statut === 'refusee') {
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Refusée
+                </span>`;
+        } else if (statut === 'en_attente') {
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    En attente
+                </span>`;
+        } else {
+            return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    ${statut.charAt(0).toUpperCase() + statut.slice(1).replace('_', ' ')}
+                </span>`;
+        }
+    }
+    
+    function attachActionListeners() {
+        // Attach event listeners to newly rendered buttons
+        document.querySelectorAll('.btn-approve').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const demandeId = this.getAttribute('data-demande-id');
+                approveRequest(demandeId);
+            });
+        });
+        
+        document.querySelectorAll('.btn-refuse').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const demandeId = this.getAttribute('data-demande-id');
+                rejectRequest(demandeId);
+            });
+        });
+        
+        document.querySelectorAll('.btn-details').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const demandeId = this.getAttribute('data-demande-id');
+                showDetailsModal(demandeId);
+            });
+        });
+    }
+    
+    // Replace the existing applyFilters function with a call to filterDemandes
+    filterService.addEventListener('change', filterDemandes);
+    filterType.addEventListener('change', filterDemandes);
+    filterStatut.addEventListener('change', filterDemandes);
+    searchSalarie.addEventListener('input', filterDemandes);
 });
 </script>
 

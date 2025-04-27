@@ -97,4 +97,20 @@ class DemandeConge extends Model
     {
         return $query->where('statut', 'refusee');
     }
+    
+    /**
+     * Relation avec l'utilisateur qui a approuvé la demande
+     */
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+    
+    /**
+     * Relation avec l'utilisateur qui a refusé la demande
+     */
+    public function rejectedBy()
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
 }
