@@ -30,11 +30,12 @@ Route::middleware(['auth'])->group(function () {
         
         // Routes pour la gestion des congés
         Route::get('/conges', [App\Http\Controllers\CongeController::class, 'index'])->name('conges.index');
+        Route::get('/conges/create', [App\Http\Controllers\CongeController::class, 'create'])->name('conges.create');
         Route::post('/conges', [App\Http\Controllers\CongeController::class, 'store'])->name('conges.store');
         Route::get('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'show'])->name('conges.show');
+        Route::get('/conges/{demande}/edit', [App\Http\Controllers\CongeController::class, 'edit'])->name('conges.edit');
         Route::put('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'update'])->name('conges.update');
         Route::delete('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'destroy'])->name('conges.destroy');
-        Route::put('/conges/{demande}/cancel', [App\Http\Controllers\CongeController::class, 'cancel'])->name('conges.cancel');
         
         // Route Ajax pour récupérer les demandes
         Route::get('/api/conges', [App\Http\Controllers\CongeController::class, 'getDemandes'])->name('api.conges.index');
@@ -55,6 +56,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/hr/suivi-absences', function () {
             return view('hr.suivi_absences');
         })->name('hr.suivi_absences');
+        
+        // Route pour mettre à jour le statut d'une demande de congé
+        Route::post('/conges/{id}/update-statut', [App\Http\Controllers\CongeController::class, 'updateStatutDemande'])->name('conges.update-statut');
+        
+        // Route pour le filtrage AJAX des demandes
+        Route::post('/api/conges/filter', [App\Http\Controllers\CongeController::class, 'filter'])->name('api.conges.filter');
     });
 
     // Routes pour les pages Admin
@@ -76,3 +83,7 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 });
+
+Route::get('/demo/decider-demande', function () {
+    return view('examples.decider_demande');
+})->name('demo.decider');

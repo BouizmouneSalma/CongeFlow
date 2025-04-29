@@ -239,8 +239,15 @@ class CongeController extends Controller
         return redirect()->route('conges.index')->with('success', 'Demande supprimée avec succès');
     }
 
+    /**
+     * Filter leave requests based on criteria (AJAX)
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function filter(Request $request)
     {
+        // Validate the incoming request
         $validated = $request->validate([
             'service_id' => 'nullable|exists:services,id',
             'type_id' => 'nullable|exists:type_conges,id',
@@ -252,11 +259,18 @@ class CongeController extends Controller
         $user = auth()->user();
         $isRH = $user->hasRole('rh');
 
+        // Base query
         $query = DemandeConge::with(['user.service', 'type'])
             ->when($isRH, function ($query) {
+                // RH sees all requests
                 return $query;
+            })
+            ->when(!$isRH, function ($query) use ($userId) {
+                // Regular users only see their own requests
+                return $query->where('user_id', $userId);
             });
 
+        // Apply filters
         $query->when($request->filled('service_id'), function ($query) use ($request) {
             return $query->whereHas('user.service', function ($q) use ($request) {
                 $q->where('id', $request->service_id);
@@ -276,11 +290,66 @@ class CongeController extends Controller
             });
         });
 
+
         $demandes = $query->latest()->get();
 
         return response()->json([
             'success' => true,
             'demandes' => $demandes
         ]);
+    }
+
+    public function updateStatutDemande(Request $request, $id)
+    {
+        // Validation des données
+        $request->validate([
+            'statut' => 'required|in:approuvee,refusee',
+            // 'commentaire' => 'required_if:statut,refusee',
+        ]);
+        $demande = DemandeConge::findOrFail($id);
+        
+        if (!auth()->user()->hasRole('rh')) {
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Vous n\'êtes pas autorisé à effectuer cette action.'
+                ], 403);
+            }
+            return back()->with('error', 'Vous n\'êtes pas autorisé à effectuer cette action.');
+        }
+        
+        // Vérifier que la demande est en attente
+        if ($demande->statut !== 'en_attente') {
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cette demande ne peut plus être modifiée.'
+                ], 400);
+            }
+            return back()->with('error', 'Cette demande ne peut plus être modifiée.');
+        }
+
+        // Mise à jour du statut
+        $demande->statut = $request->statut;
+        
+        // Ajout du commentaire si la demande est refusée
+        if ($request->statut === 'refusee') {
+            // $demande->commentaire = $request->commentaire;
+            $message = 'La demande de congé a été refusée.';
+        } else {
+            $message = 'La demande de congé a été approuvée.';
+        }
+        
+        $demande->save();
+                
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'demande' => $demande
+            ]);
+        }
+        
+        return back()->with('success', $message);
     }
 } 

@@ -145,20 +145,30 @@
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
                                 @if($demande->statut == 'en_attente')
-                                <button 
-                                    class="btn-approve inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
-                                    data-demande-id="{{ $demande->id }}"
-                                    title="Approuver cette demande"
-                                >
-                                    <i class="fas fa-check mr-1"></i> Approuver
-                                </button>
-                                <button 
-                                    class="btn-refuse inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150"
-                                    data-demande-id="{{ $demande->id }}"
-                                    title="Refuser cette demande"
-                                >
-                                    <i class="fas fa-times mr-1"></i> Refuser
-                                </button>
+                                <form action="/conges/{{$demande->id}}/update-statut" method="POST">
+                                    @csrf
+                                    <input type="hidden" value="approuvee" name="statut">
+                                    <button 
+                                        class="btn-approve inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
+                                        data-demande-id="{{ $demande->id }}"
+                                        title="Approuver cette demande"
+                                        type="submit"
+                                    >
+                                        <i class="fas fa-check mr-1"></i> Approuver
+                                    </button>
+                                </form>
+                                <form action="/conges/{{$demande->id}}/update-statut" method="POST">
+                                    @csrf
+                                    <input type="hidden" value="refusee" name="statut">
+                                    <button 
+                                        class="btn-refuse inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150"
+                                        data-demande-id="{{ $demande->id }}"
+                                        title="Refuser cette demande"
+                                        type="submit"
+                                    >
+                                        <i class="fas fa-times mr-1"></i> Refuser
+                                    </button>
+                                </form>
                                 @endif
                                 <button 
                                     class="btn-details inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-150"
@@ -334,9 +344,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Demander confirmation avant d'approuver
             if (confirm('Êtes-vous sûr de vouloir approuver cette demande de congé ?')) {
                 updateDemandeStatus(demandeId, 'approuvee');
-                
-                // Feedback visuel
-                showNotification('Demande approuvée avec succès', 'success');
             }
         });
     });
@@ -358,28 +365,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDemandeStatus(demandeId, status, commentaire = '') {
         // Simuler un spinner ou une indication de chargement
         const row = document.querySelector(`tr[data-demande-id="${demandeId}"]`);
+        const actionCell = row ? row.querySelector('td:last-child') : null;
+        let originalContent = null;
+        
         if (row) {
             row.classList.add('opacity-50');
             
             // Ajouter un spinner dans la cellule des actions
-            const actionCell = row.querySelector('td:last-child');
             if (actionCell) {
-                const originalContent = actionCell.innerHTML;
+                originalContent = actionCell.innerHTML;
                 actionCell.innerHTML = `<div class="flex justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>`;
             }
         }
         
-        // URL et données pour la requête AJAX
-        let url = '';
-        let data = {};
-        
-        if (status === 'approuvee') {
-            url = `/conges/${demandeId}/approve`;
-            data = {};
-        } else if (status === 'refusee') {
-            url = `/conges/${demandeId}/reject`;
-            data = { motif_refus: commentaire };
-        }
+        // URL et données pour la requête AJAX - using the correct route path
+        const url = `/conges/${demandeId}/update-statut`;
+        const data = {
+            statut: status,
+            commentaire: commentaire || ''
+        };
         
         // Appel AJAX pour mettre à jour le statut
         fetch(url, {
@@ -393,7 +397,9 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Erreur réseau');
+                return response.json().then(errData => {
+                    throw new Error(errData.message || 'Erreur réseau');
+                });
             }
             return response.json();
         })
@@ -410,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     actionCell.innerHTML = originalContent;
                 }
             }
-            showNotification('Une erreur est survenue lors de la mise à jour de la demande.', 'error');
+            showNotification(error.message || 'Une erreur est survenue lors de la mise à jour de la demande.', 'error');
         });
     }
     
@@ -614,7 +620,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentDemandeStatut === 'en_attente') {
                 updateDemandeStatus(currentDemandeId, 'approuvee');
                 closeDetailsModal();
-                showNotification('Demande approuvée avec succès', 'success');
             }
         }
     });
