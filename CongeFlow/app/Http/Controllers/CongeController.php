@@ -203,17 +203,12 @@ class CongeController extends Controller
         return view('hr.gestion_conges', compact('demandesEnAttente', 'demandesTraitees', 'types', 'services', 'statuts'));
     }
     
-    /**
-     * Annule une demande de congé (pour l'employé)
-     */
     public function cancel(Request $request, DemandeConge $demande)
     {
-        // Vérifier si l'utilisateur est bien le propriétaire de la demande
         if (Auth::id() !== $demande->user_id) {
             return response()->json(['error' => 'Non autorisé'], 403);
         }
         
-        // Vérifier si la demande peut être annulée
         if ($demande->statut !== 'en_attente') {
             return response()->json(['error' => 'Seules les demandes en attente peuvent être annulées'], 400);
         }
@@ -310,7 +305,7 @@ class CongeController extends Controller
         $demande->statut = $request->statut;
         
         if ($request->statut === 'refusee') {
-            $demande->commentaire_rejet = $request->commentaire;
+            $demande->commentaire = $request->commentaire;
             $message = 'La demande de congé a été refusée.';
         } else {
             $message = 'La demande de congé a été approuvée.';
@@ -319,7 +314,7 @@ class CongeController extends Controller
         $demande->date_traitement = now();
         $demande->traite_par = auth()->id();
         $demande->save();
-        
+
         return redirect()->route('conges.index')->with('success', $message);
     }
 } 

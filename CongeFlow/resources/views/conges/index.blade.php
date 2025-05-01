@@ -333,15 +333,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDemande() {
         const id = document.getElementById('edit-id').value;
         const formData = new FormData(editForm);
+        const data = {};
+        
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+        
+        // Ajout du token CSRF et de la méthode
+        data._token = api.token;
+        data._method = 'PUT';
         
         fetch(`${api.baseUrl}/conges/${id}`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': api.token,
+                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            body: formData
+            body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(data => {
@@ -355,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showAlert(errorMessage, 'error');
             } else {
                 editModal.classList.add('hidden');
-                showAlert(data.message);
+                showAlert(data.message || 'Demande mise à jour avec succès');
                 refreshDemandes();
             }
         })
@@ -408,18 +418,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Event listener pour le bouton de confirmation
         document.getElementById('confirm-button').onclick = function() {
-            fetch(`/api/conges/${id}`, {
-                method: 'DELETE',
+            // Créer un form data avec méthode DELETE pour simuler une requête DELETE
+            const formData = new FormData();
+            formData.append('_token', api.token);
+            formData.append('_method', 'DELETE');
+            
+            fetch(`${api.baseUrl}/conges/${id}`, {
+                method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': api.token,
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
-                }
+                },
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
                 confirmModal.classList.add('hidden');
-                showAlert(data.message);
+                showAlert(data.message || 'Demande supprimée avec succès');
                 refreshDemandes();
             })
             .catch(error => {
