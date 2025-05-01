@@ -12,7 +12,9 @@ class RouteServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->configureRateLimiting();
+        // RateLimiter::for('api', function ($request) {
+        //     return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
+        // });
 
         // Ajouter une liaison de modèle pour les utilisateurs RH
         Route::bind('rh', function ($value) {

@@ -15,43 +15,14 @@
     <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h2 class="text-lg font-semibold text-gray-800">Demandes de congés</h2>
-            <div class="flex space-x-2">
-                <div class="relative">
-                    <select id="filter-service" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500 text-sm">
-                        <option value="">Tous les services</option>
-                        @foreach($services as $service)
-                            <option value="{{ $service->id }}">{{ $service->nom }}</option>
-                        @endforeach
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
-                <div class="relative">
-                    <select id="filter-type" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500 text-sm">
-                        <option value="">Tous les types</option>
-                        @foreach($types as $type)
-                            <option value="{{ $type->id }}">{{ $type->nom }}</option>
-                        @endforeach
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
-                <div class="relative">
-                    <select id="filter-statut" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-3 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500 text-sm">
-                        <option value="">Tous les statuts</option>
-                        @foreach($statuts as $key => $value)
-                            <option value="{{ $key }}">{{ $value }}</option>
-                        @endforeach
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
-                <div class="relative">
-                    <input type="text" id="search-salarie" placeholder="Rechercher un salarié" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded leading-tight focus:outline-none focus:bg-white focus:border-blue-500 text-sm">
-                </div>
+            <div class="flex items-center space-x-2">
+                <select id="filterStatus" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                    <option value="all">Tous les statuts</option>
+                    <option value="en_attente">En attente</option>
+                    <option value="approuvee">Approuvée</option>
+                    <option value="refusee">Refusée</option>
+                    <option value="annulee">Annulée</option>
+                </select>
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -285,13 +256,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Variables globales
     let currentDemandeId = null;
     let currentDemandeStatut = null;
-    
+ 
+
     // Filtrage des demandes
-    const filterService = document.getElementById('filter-service');
-    const filterType = document.getElementById('filter-type');
-    const filterStatut = document.getElementById('filter-statut');
-    const searchSalarie = document.getElementById('search-salarie');
-    
+    const filterStatus = document.getElementById('filterStatus');
+
+    filterStatus.addEventListener('change', filterDemandes);
+// Fonction pour filtrer les demandes par statut
+function filterDemandes() {
+        const status = filterStatus.value;
+        const rows = congesTableBody.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            if (status === 'all' || row.dataset.status === status) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+    }
     function applyFilters() {
         const serviceValue = filterService.value;
         const typeValue = filterType.value;
@@ -454,7 +437,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Charger les détails de la demande
         fetch(`/conges/${demandeId}`, {
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
             }
         })
         .then(response => {
@@ -493,7 +477,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="grid grid-cols-2 gap-4 animate-fade-in">
                         <div>
                             <p class="text-sm font-medium text-gray-500">Salarié</p>
-                            <p class="text-sm font-bold text-gray-900">${demande.user.name}</p>
+                            <p class="text-sm font-bold text-gray-900">${demande.user.nom} ${demande.user.prenom}</p>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500">Email</p>
@@ -531,11 +515,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-span-2">
                             <p class="text-sm font-medium text-gray-500">Commentaire</p>
                             <p class="text-sm text-gray-900 bg-gray-50 p-2 rounded">${demande.commentaire}</p>
-                        </div>` : ''}
-                        ${demande.motif_refus ? `
-                        <div class="col-span-2">
-                            <p class="text-sm font-medium text-gray-500">Motif de refus</p>
-                            <p class="text-sm text-gray-900 bg-red-50 p-2 rounded border border-red-100">${demande.motif_refus}</p>
                         </div>` : ''}
                     </div>
                     ${demande.motif ? `
@@ -772,18 +751,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Enhance the existing filterDemandes function
+    // Fonction pour filtrer les demandes avec AJAX
     function filterDemandes() {
-        const serviceValue = filterService.value;
-        const typeValue = filterType.value;
-        const statutValue = filterStatut.value;
-        const searchValue = searchSalarie.value.toLowerCase();
+        // Récupérer les valeurs des filtres
+        const serviceValue = document.getElementById('filter-service').value;
+        const typeValue = document.getElementById('filter-type').value;
+        const statutValue = document.getElementById('filter-statut').value;
+        const searchValue = document.getElementById('search-salarie').value;
         
+        // Afficher un indicateur de chargement
+        const tableBody = document.getElementById('demandes-list');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="8" class="px-6 py-4 text-center">
+                    <div class="flex justify-center">
+                        <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    <p class="mt-2 text-gray-500">Chargement des résultats...</p>
+                </td>
+            </tr>
+        `;
+        
+        // Envoyer les données au serveur
         fetch('/api/conges/filter', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 service_id: serviceValue,
@@ -792,17 +790,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 search: searchValue
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erreur réseau');
+            }
+            return response.json();
+        })
         .then(data => {
-            renderDemandesTable(data.demandes);
+            if (data.success) {
+                // Rendre le tableau avec les données filtrées
+                renderDemandesTable(data.demandes);
+            } else {
+                showNotification('Une erreur est survenue lors du filtrage', 'error');
+            }
         })
         .catch(error => {
-            console.error('Erreur lors du filtrage des demandes:', error);
-            applyFilters(); // Fallback to client-side filtering
+            console.error('Erreur lors du filtrage :', error);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="px-6 py-4 text-center text-red-500">
+                        Une erreur est survenue lors du filtrage des demandes. Veuillez réessayer.
+                    </td>
+                </tr>
+            `;
+            showNotification('Erreur lors du filtrage des demandes', 'error');
         });
     }
     
-    // Function to render the table with filtered data
+    // Fonction pour afficher les demandes filtrées
     function renderDemandesTable(demandes) {
         const tableBody = document.getElementById('demandes-list');
         
@@ -812,7 +827,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tableBody.innerHTML = `
                 <tr>
                     <td colspan="8" class="px-6 py-4 text-center text-gray-500">
-                        Aucune demande trouvée
+                        Aucune demande ne correspond aux critères de recherche
                     </td>
                 </tr>
             `;
@@ -837,10 +852,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10">
-                                <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=${encodeURIComponent(demande.user?.name || 'User')}&background=random" alt="">
+                                <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=${encodeURIComponent(demande.user?.nom || '')}+${encodeURIComponent(demande.user?.prenom || '')}&background=random" alt="">
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">${demande.user?.name || 'N/A'}</div>
+                                <div class="text-sm font-medium text-gray-900">${demande.user?.nom || 'N/A'} ${demande.user?.prenom || ''}</div>
                                 <div class="text-sm text-gray-500">${demande.user?.email || 'N/A'}</div>
                             </div>
                         </div>
@@ -868,20 +883,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end space-x-2">
                             ${demande.statut === 'en_attente' ? `
-                                <button 
-                                    class="btn-approve inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
-                                    data-demande-id="${demande.id}"
-                                    title="Approuver cette demande"
-                                >
-                                    <i class="fas fa-check mr-1"></i> Approuver
-                                </button>
-                                <button 
-                                    class="btn-refuse inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150"
-                                    data-demande-id="${demande.id}"
-                                    title="Refuser cette demande"
-                                >
-                                    <i class="fas fa-times mr-1"></i> Refuser
-                                </button>
+                                <form action="/conges/${demande.id}/update-statut" method="POST">
+                                    @csrf
+                                    <input type="hidden" value="approuvee" name="statut">
+                                    <button 
+                                        class="btn-approve inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
+                                        data-demande-id="${demande.id}"
+                                        title="Approuver cette demande"
+                                        type="submit"
+                                    >
+                                        <i class="fas fa-check mr-1"></i> Approuver
+                                    </button>
+                                </form>
+                                <form action="/conges/${demande.id}/update-statut" method="POST">
+                                    @csrf
+                                    <input type="hidden" value="refusee" name="statut">
+                                    <button 
+                                        class="btn-refuse inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150"
+                                        data-demande-id="${demande.id}"
+                                        title="Refuser cette demande"
+                                        type="submit"
+                                    >
+                                        <i class="fas fa-times mr-1"></i> Refuser
+                                    </button>
+                                </form>
                             ` : ''}
                             <button 
                                 class="btn-details inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-150"
@@ -899,10 +924,9 @@ document.addEventListener('DOMContentLoaded', function() {
         tableBody.innerHTML = html;
         updateCounter(demandes.length, demandes.length);
         
-        // Reattach event listeners
-        attachActionListeners();
+        // Réattacher les événements aux boutons
+        attachEventListeners();
     }
-    
     function formatStatus(statut) {
         if (statut === 'approuvee') {
             return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -923,22 +947,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function attachActionListeners() {
-        // Attach event listeners to newly rendered buttons
-        document.querySelectorAll('.btn-approve').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const demandeId = this.getAttribute('data-demande-id');
-                approveRequest(demandeId);
-            });
-        });
-        
-        document.querySelectorAll('.btn-refuse').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const demandeId = this.getAttribute('data-demande-id');
-                rejectRequest(demandeId);
-            });
-        });
-        
+    // Fonction pour attacher les événements aux boutons après le rendu
+    function attachEventListeners() {
+        // Attacher les événements aux boutons de détails
         document.querySelectorAll('.btn-details').forEach(btn => {
             btn.addEventListener('click', function() {
                 const demandeId = this.getAttribute('data-demande-id');
@@ -947,11 +958,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Replace the existing applyFilters function with a call to filterDemandes
-    filterService.addEventListener('change', filterDemandes);
-    filterType.addEventListener('change', filterDemandes);
-    filterStatut.addEventListener('change', filterDemandes);
-    searchSalarie.addEventListener('input', filterDemandes);
+    // Ajouter les écouteurs d'événements pour les filtres
+    document.getElementById('filter-service').addEventListener('change', filterDemandes);
+    document.getElementById('filter-type').addEventListener('change', filterDemandes);
+    document.getElementById('filter-statut').addEventListener('change', filterDemandes);
+    document.getElementById('search-salarie').addEventListener('input', debounce(filterDemandes, 500));
+    
+    // Fonction debounce pour éviter trop d'appels API lors de la recherche
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
 });
 </script>
 

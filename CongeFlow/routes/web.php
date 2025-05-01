@@ -35,7 +35,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'show'])->name('conges.show');
         Route::get('/conges/{demande}/edit', [App\Http\Controllers\CongeController::class, 'edit'])->name('conges.edit');
         Route::put('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'update'])->name('conges.update');
-        Route::delete('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'destroy'])->name('conges.destroy');
+        //Route::delete('/conges/{demande}', [App\Http\Controllers\CongeController::class, 'destroy'])->name('conges.destroy');
+        Route::post('/conges/{demande}/cancel', [App\Http\Controllers\CongeController::class, 'cancel'])->name('conges.cancel');
         
         // Route Ajax pour récupérer les demandes
         Route::get('/api/conges', [App\Http\Controllers\CongeController::class, 'getDemandes'])->name('api.conges.index');

@@ -10,7 +10,7 @@
             </button>
         </div>
         
-        <!-- Alerte de résultat d'action (créées dynamiquement) -->
+        <!-- Alerte de résultat d'action-->
         <div id="alertBox" class="mb-4 hidden"></div>
 
         <!-- Tableau des demandes -->
@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Event listener pour le bouton de confirmation
         document.getElementById('confirm-button').onclick = function() {
-            fetch(`${api.baseUrl}/conges/${id}`, {
+            fetch(`/api/conges/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': api.token,
