@@ -21,6 +21,8 @@ class User extends Authenticatable
         'status',
         'dateInscription',
         'service_id',
+        'poste',
+        'date_embauche',
     ];
 
     protected $hidden = [

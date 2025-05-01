@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\SalarieController;
+use App\Http\Controllers\ProfileController;
 
 // Authentication Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -14,6 +16,10 @@ Route::get('/', function () {
 
 // Routes protégées
 Route::middleware(['auth'])->group(function () {
+    // Routes pour le profil utilisateur
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    
     // Routes pour les pages Salarié
     Route::middleware(['role:salarie,rh,admin'])->group(function () {
         Route::get('/employee/solde', function () {
@@ -44,9 +50,13 @@ Route::middleware(['auth'])->group(function () {
 
     // Routes pour les pages RH
     Route::middleware(['role:rh'])->group(function () {
-        Route::get('/hr/gestion-salaries', function () {
-            return view('hr.gestion_salaries');
-        })->name('hr.gestion_salaries');
+        // Gestion des salariés
+        Route::get('/hr/gestion-salaries', [SalarieController::class, 'index'])->name('hr.salaries.index');
+        Route::get('/hr/salaries/create', [SalarieController::class, 'create'])->name('hr.salaries.create');
+        Route::post('/hr/salaries', [SalarieController::class, 'store'])->name('hr.salaries.store');
+        Route::get('/hr/salaries/{salarie}/edit', [SalarieController::class, 'edit'])->name('hr.salaries.edit');
+        Route::put('/hr/salaries/{salarie}', [SalarieController::class, 'update'])->name('hr.salaries.update');
+        Route::delete('/hr/salaries/{salarie}', [SalarieController::class, 'destroy'])->name('hr.salaries.destroy');
 
         Route::get('/hr/gestion-conges', [App\Http\Controllers\CongeController::class, 'gestionConges'])->name('hr.gestion_conges');
 
@@ -88,3 +98,7 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/demo/decider-demande', function () {
     return view('examples.decider_demande');
 })->name('demo.decider');
+
+// Routes de test pour l'upload de photos
+Route::get('/test/upload', [App\Http\Controllers\PhotoController::class, 'showForm'])->name('test.upload.form');
+Route::post('/test/upload', [App\Http\Controllers\PhotoController::class, 'upload'])->name('test.upload');
