@@ -58,9 +58,6 @@
                                 <a href="{{ route('conges.index') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Mes demandes
                                 </a>
-                                <a href="{{ route('employee.demande') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Demande de congés
-                                </a>
                                 <a href="{{ route('employee.historique') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                     Historique
                                 </a>

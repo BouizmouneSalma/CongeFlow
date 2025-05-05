@@ -25,11 +25,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/employee/solde', function () {
             return view('employee.solde_conges');
         })->name('employee.solde');
-
-        Route::get('/employee/demande', function () {
-            return view('employee.demande_conges');
-        })->name('employee.demande');
-
         Route::get('/employee/historique', function () {
             return view('employee.historique');
         })->name('employee.historique');
