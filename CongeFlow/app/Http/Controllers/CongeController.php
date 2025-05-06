@@ -288,10 +288,10 @@ class CongeController extends Controller
     }
 
     public function updateStatutDemande(Request $request, $id)
-    {
+    {    
         $request->validate([
             'statut' => 'required|in:approuvee,refusee',
-            'commentaire' => 'required_if:statut,refusee',
+            // 'commentaire' => 'required_if:statut,refusee',
         ]);
         $demande = DemandeConge::findOrFail($id);
         

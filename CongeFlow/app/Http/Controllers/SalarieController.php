@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use App\Mail\SendCredentials;
+use Illuminate\Support\Facades\Mail;
 
 class SalarieController extends Controller
 {
@@ -83,28 +85,20 @@ class SalarieController extends Controller
             }
         }
 
-        // Création du salarié
         $salarie = User::create($data);
 
-        // Envoi de l'email de bienvenue avec les informations de connexion
-        $salarie->notify(new WelcomeNotification($request->password));
+        Mail::to($salarie->email)->send(new SendCredentials($salarie->nom, $salarie->email, $request -> password));
 
         return redirect()->route('hr.salaries.index')
             ->with('success', 'Salarié ajouté avec succès et email envoyé.');
     }
 
-    /**
-     * Afficher le formulaire d'édition d'un salarié
-     */
     public function edit(User $salarie)
     {
         $services = Service::all();
         return view('hr.salaries.edit', compact('salarie', 'services'));
     }
 
-    /**
-     * Mettre à jour un salarié
-     */
     public function update(Request $request, User $salarie)
     {
         $request->validate([
@@ -128,7 +122,7 @@ class SalarieController extends Controller
             'date_embauche' => $request->date_embauche,
         ];
 
-        // Gérer l'upload de photo de profil
+        // Upload de pic
         if ($request->hasFile('photoProfile') && $request->file('photoProfile')->isValid()) {
             try {
                 // Supprimer l'ancienne photo si elle existe
