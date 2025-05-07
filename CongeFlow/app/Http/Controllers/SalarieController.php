@@ -153,7 +153,6 @@ class SalarieController extends Controller
             }
         }
         
-        // Supprimer la photo si demandé
         if ($request->has('remove_photo') && $request->remove_photo && $salarie->photoProfile) {
             try {
                 Storage::disk('public')->delete($salarie->photoProfile);
@@ -163,7 +162,6 @@ class SalarieController extends Controller
             }
         }
 
-        // Mettre à jour le mot de passe uniquement s'il est fourni
         if ($request->filled('password') && $request->filled('password_confirmation')) {
             $request->validate([
                 'password' => 'required|string|min:8|confirmed',
@@ -177,9 +175,6 @@ class SalarieController extends Controller
             ->with('success', 'Salarié mis à jour avec succès.');
     }
 
-    /**
-     * Supprimer un salarié
-     */
     public function destroy(User $salarie)
     {
         if ($salarie->role !== 'salarie') {
@@ -187,7 +182,7 @@ class SalarieController extends Controller
                 ->with('error', 'Vous ne pouvez supprimer que des utilisateurs salariés.');
         }
 
-        // Supprimer la photo de profil si elle existe
+
         if ($salarie->photoProfile) {
             Storage::disk('public')->delete($salarie->photoProfile);
         }

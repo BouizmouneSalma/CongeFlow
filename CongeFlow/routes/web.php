@@ -25,9 +25,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/employee/solde', function () {
             return view('employee.solde_conges');
         })->name('employee.solde');
-        Route::get('/employee/historique', function () {
-            return view('employee.historique');
-        })->name('employee.historique');
+        Route::get('/employee/historique', [App\Http\Controllers\Employee\LeaveHistoryController::class, 'index'])->name('employee.historique');
         
         // Routes pour la gestion des congés
         Route::get('/conges', [App\Http\Controllers\CongeController::class, 'index'])->name('conges.index');
