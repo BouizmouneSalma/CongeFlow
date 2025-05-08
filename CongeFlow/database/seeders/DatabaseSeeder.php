@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Service;
-use Carbon\Carbon;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -70,7 +70,9 @@ class DatabaseSeeder extends Seeder
             'service_id' => $serviceInfo,
         ]);
         
-        // Appel du seeder pour les types de congés
-        $this->call(TypeSeeder::class);
+        // Appel des seeders
+        $this->call([
+            TypeSeeder::class
+        ]);
     }
 }

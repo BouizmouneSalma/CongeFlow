@@ -10,10 +10,12 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
                 <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-lg font-medium text-blue-800">Congés annuels</h3>
+                    <h3 class="text-lg font-medium text-blue-800">Congés disponibles</h3>
                     <i class="fas fa-calendar-alt text-blue-500 text-2xl"></i>
                 </div>
-                <div class="text-3xl font-bold text-blue-600">18</div>
+                <div class="text-3xl font-bold text-blue-600">
+                    {{ $typesConges->where('nom', 'Congés annuels')->first()['restants'] ?? 0 }}
+                </div>
                 <div class="text-sm text-blue-700 mt-1">jours disponibles</div>
             </div>
             
@@ -22,7 +24,7 @@
                     <h3 class="text-lg font-medium text-green-800">Congés pris</h3>
                     <i class="fas fa-check-circle text-green-500 text-2xl"></i>
                 </div>
-                <div class="text-3xl font-bold text-green-600">5</div>
+                <div class="text-3xl font-bold text-green-600">{{ $congesPris }}</div>
                 <div class="text-sm text-green-700 mt-1">jours utilisés cette année</div>
             </div>
             
@@ -31,7 +33,7 @@
                     <h3 class="text-lg font-medium text-yellow-800">Congés en attente</h3>
                     <i class="fas fa-clock text-yellow-500 text-2xl"></i>
                 </div>
-                <div class="text-3xl font-bold text-yellow-600">2</div>
+                <div class="text-3xl font-bold text-yellow-600">{{ $congesEnAttente }}</div>
                 <div class="text-sm text-yellow-700 mt-1">jours en attente d'approbation</div>
             </div>
         </div>
@@ -51,48 +53,22 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($typesConges as $type)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">Congé annuel payé</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $type['nom'] }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">18 jours</div>
+                                <div class="text-sm text-gray-900">{{ $type['droits'] }} jours</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">5 jours</div>
+                                <div class="text-sm text-gray-900">{{ $type['pris'] }} jours</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">13 jours</div>
+                                <div class="text-sm text-gray-900">{{ $type['restants'] }} jours</div>
                             </td>
                         </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">Congé maladie</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Variable</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">0 jours</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">-</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">Congé exceptionnel</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">Selon événement</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">0 jours</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">-</div>
-                            </td>
-                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>

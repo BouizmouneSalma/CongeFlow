@@ -11,16 +11,35 @@ class Type extends Model
     
     protected $fillable = [
         'libelle',
-        'duree_max',
+        'duree',
         'couleur',
         'description',
+        'paiement',
+        'source_paiement',
+        'taux_paiement',
+        'actif'
     ];
     
     /**
-     * Les demandes de congé de ce type
+     * Les congés de ce type
+     */
+    public function conges()
+    {
+        return $this->hasMany(Conge::class);
+    }
+
+    /**
+     * Les demandes de congé de ce type (via la table conges)
      */
     public function demandesConge()
     {
-        return $this->hasMany(DemandeConge::class);
+        return $this->hasManyThrough(
+            DemandeConge::class,
+            Conge::class,
+            'type_id', // Clé étrangère sur la table conges
+            'conge_id', // Clé étrangère sur la table demande_conges
+            'id', // Clé locale sur la table types
+            'idConge' // Clé locale sur la table conges
+        );
     }
 }

@@ -12,13 +12,15 @@ class LeaveHistoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DemandeConge::with(['type'])
+        $query = DemandeConge::with(['conge.type'])
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc');
 
         // Filtrage par type
         if ($request->filled('type')) {
-            $query->where('type_id', $request->type);
+            $query->whereHas('conge', function($q) use ($request) {
+                $q->where('type_id', $request->type);
+            });
         }
 
         // Filtrage par statut

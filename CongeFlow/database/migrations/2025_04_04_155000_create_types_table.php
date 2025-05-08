@@ -11,9 +11,11 @@ return new class extends Migration
         Schema::create('types', function (Blueprint $table) {
             $table->id();
             $table->string('libelle');
-            $table->integer('duree_max')->nullable();
-            $table->string('couleur')->default('#3b82f6');
             $table->text('description')->nullable();
+            $table->string('duree');
+            $table->text('paiement');
+            $table->string('couleur')->default('#3B82F6');
+            $table->boolean('actif')->default(true);
             $table->timestamps();
         });
     }

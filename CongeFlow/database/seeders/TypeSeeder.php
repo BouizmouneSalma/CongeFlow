@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Type;
 use Illuminate\Database\Seeder;
+use App\Models\Type;
 
 class TypeSeeder extends Seeder
 {
@@ -15,47 +15,62 @@ class TypeSeeder extends Seeder
         $types = [
             [
                 'libelle' => 'Congé annuel payé',
-                'duree_max' => 18,
-                'couleur' => '#3b82f6', // blue
-                'description' => '1,5 jour/mois (18 jours/an) - Salaire normal, indemnité compensatrice en cas de rupture',
+                'description' => 'Congés payés annuels légaux',
+                'duree' => '1,5 jour/mois',
+                'duree_max' => 18, // 18 jours par an
+                'paiement' => 100, // 100% du salaire
+                'couleur' => '#3B82F6', // Bleu
+                'actif' => true
             ],
             [
                 'libelle' => 'Congé de maternité',
-                'duree_max' => 98, // 14 semaines
-                'couleur' => '#ec4899', // pink
-                'description' => '14 semaines (7 avant + 7 après) - Indemnité CNSS (100% du salaire moyen)',
+                'description' => 'Congé accordé aux femmes enceintes',
+                'duree' => '14 semaines (7 avant + 7 après)',
+                'duree_max' => 98, // 14 semaines * 7 jours
+                'paiement' => 100, // 100% via CNSS
+                'couleur' => '#EC4899', // Rose
+                'actif' => true
             ],
             [
                 'libelle' => 'Congé de paternité',
+                'description' => 'Congé accordé aux nouveaux pères',
+                'duree' => '3 jours',
                 'duree_max' => 3,
-                'couleur' => '#8b5cf6', // purple
-                'description' => '3 jours - Salaire normal, remboursé par la CNSS',
+                'paiement' => 100, // 100% remboursé par CNSS
+                'couleur' => '#8B5CF6', // Violet
+                'actif' => true
             ],
             [
                 'libelle' => 'Congés exceptionnels',
+                'description' => 'Congés pour événements familiaux ou personnels (mariage, décès, circoncision, opération)',
+                'duree' => '2 à 4 jours',
                 'duree_max' => 4,
-                'couleur' => '#f59e0b', // amber
-                'description' => '2 à 4 jours (mariage, décès, circoncision, opération) - Rémunéré par l\'employeur',
+                'paiement' => 100, // Rémunéré par l'employeur
+                'couleur' => '#F59E0B', // Orange
+                'actif' => true
             ],
             [
                 'libelle' => 'Congé maladie',
-                'duree_max' => null,
-                'couleur' => '#ef4444', // red
-                'description' => 'Variable selon certificat médical - Non rémunéré sauf dispositions spécifiques',
+                'description' => 'Congé pour raison médicale',
+                'duree' => 'Variable selon certificat médical',
+                'duree_max' => null, // Variable selon le certificat
+                'paiement' => 0, // Non rémunéré sauf dispositions spécifiques
+                'couleur' => '#EF4444', // Rouge
+                'actif' => true
             ],
             [
                 'libelle' => 'Accident du travail',
-                'duree_max' => null,
-                'couleur' => '#10b981', // emerald
-                'description' => 'Jusqu\'à guérison - Indemnité CNSS et maintien du congé annuel',
-            ],
+                'description' => 'Congé suite à un accident de travail',
+                'duree' => 'Jusqu\'à guérison',
+                'duree_max' => null, // Variable selon la guérison
+                'paiement' => 100, // Indemnité CNSS
+                'couleur' => '#DC2626', // Rouge foncé
+                'actif' => true
+            ]
         ];
 
-        foreach ($types as $typeData) {
-            Type::updateOrCreate(
-                ['libelle' => $typeData['libelle']],
-                $typeData
-            );
+        foreach ($types as $type) {
+            Type::create($type);
         }
     }
 } 

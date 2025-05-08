@@ -16,14 +16,12 @@ class DemandeConge extends Model
         'dateFin',
         'motif',
         'statut',
-        'commentaire',
-        'dateDemande'
+        'commentaire'
     ];
     
     protected $casts = [
         'dateDebut' => 'date',
-        'dateFin' => 'date',
-        'dateDemande' => 'datetime'
+        'dateFin' => 'date'
     ];
     
     /**
@@ -40,6 +38,21 @@ class DemandeConge extends Model
     public function conge()
     {
         return $this->belongsTo(Conge::class, 'conge_id', 'idConge');
+    }
+    
+    /**
+     * Obtenir le type de congé via la relation conge
+     */
+    public function type()
+    {
+        return $this->hasOneThrough(
+            Type::class,
+            Conge::class,
+            'idConge', // Clé étrangère sur la table conges
+            'id', // Clé locale sur la table types
+            'conge_id', // Clé locale sur la table demande_conges
+            'type_id' // Clé étrangère sur la table conges
+        );
     }
     
     /**

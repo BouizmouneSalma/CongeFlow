@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\SalarieController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\HR\ConfigurationCongesController;
 
 // Authentication Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -22,9 +23,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Routes pour les pages Salarié
     Route::middleware(['role:salarie,rh,admin'])->group(function () {
-        Route::get('/employee/solde', function () {
-            return view('employee.solde_conges');
-        })->name('employee.solde');
+        Route::get('/employee/solde', [App\Http\Controllers\Employee\SoldeController::class, 'index'])->name('employee.solde');
         Route::get('/employee/historique', [App\Http\Controllers\Employee\LeaveHistoryController::class, 'index'])->name('employee.historique');
         
         // Routes pour la gestion des congés
@@ -53,9 +52,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/hr/gestion-conges', [App\Http\Controllers\CongeController::class, 'gestionConges'])->name('hr.gestion_conges');
 
-        Route::get('/hr/configuration-conges', function () {
-            return view('hr.configuration_conges');
-        })->name('hr.configuration_conges');
+        Route::get('/hr/configuration-conges', [App\Http\Controllers\HR\ConfigurationCongesController::class, 'index'])->name('hr.configuration_conges');
+        Route::post('/hr/configuration-conges', [App\Http\Controllers\HR\ConfigurationCongesController::class, 'store'])->name('hr.configuration_conges.store');
 
         Route::get('/hr/suivi-absences', function () {
             return view('hr.suivi_absences');
@@ -95,3 +93,12 @@ Route::get('/demo/decider-demande', function () {
 // Routes de test pour l'upload de photos
 Route::get('/test/upload', [App\Http\Controllers\PhotoController::class, 'showForm'])->name('test.upload.form');
 Route::post('/test/upload', [App\Http\Controllers\PhotoController::class, 'upload'])->name('test.upload');
+
+// Routes pour la configuration des congés
+Route::prefix('hr')->name('hr.')->middleware(['auth', 'role:rh'])->group(function () {
+    Route::get('/configuration-conges', [ConfigurationCongesController::class, 'index'])->name('configuration_conges');
+    Route::post('/configuration-conges', [ConfigurationCongesController::class, 'store'])->name('configuration_conges.store');
+    Route::get('/configuration-conges/{type}', [ConfigurationCongesController::class, 'show'])->name('configuration_conges.show');
+    Route::put('/configuration-conges/{type}', [ConfigurationCongesController::class, 'update'])->name('configuration_conges.update');
+    Route::delete('/configuration-conges/{type}', [ConfigurationCongesController::class, 'destroy'])->name('configuration_conges.destroy');
+});
