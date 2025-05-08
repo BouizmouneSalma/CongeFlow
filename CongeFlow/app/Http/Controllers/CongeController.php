@@ -6,6 +6,7 @@ use App\Models\DemandeConge;
 use App\Models\Type;
 use App\Models\User;
 use App\Models\Service;
+use App\Models\Conge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -28,15 +29,15 @@ class CongeController extends Controller
         // Si c'est un admin, montrer les demandes uniquement pour la récupération des stats
         // Si c'est un salarié, montrer uniquement ses demandes
         if ($user->role === 'rh') {
-            $demandes = DemandeConge::with(['user', 'type'])->latest()->get();
+            $demandes = DemandeConge::with(['user', 'conge.type'])->latest()->get();
         } else if ($user->role === 'admin') {
             // Pour les admins, accès limité aux demandes (seulement pour stats)
-            $demandes = DemandeConge::with(['user', 'type'])
-                ->select(['id', 'user_id', 'type_id', 'dateDebut', 'dateFin', 'statut', 'created_at'])
+            $demandes = DemandeConge::with(['user', 'conge.type'])
+                ->select(['id', 'user_id', 'conge_id', 'dateDebut', 'dateFin', 'statut', 'created_at'])
                 ->latest()
                 ->get();
         } else {
-            $demandes = DemandeConge::with(['type'])->where('user_id', $user->id)->latest()->get();
+            $demandes = DemandeConge::with(['conge.type'])->where('user_id', $user->id)->latest()->get();
         }
         
         return view('conges.index', compact('demandes', 'types', 'user'));
@@ -50,15 +51,15 @@ class CongeController extends Controller
         $user = Auth::user();
         
         if ($user->role === 'rh') {
-            $demandes = DemandeConge::with(['user', 'type'])->latest()->get();
+            $demandes = DemandeConge::with(['user', 'conge.type'])->latest()->get();
         } else if ($user->role === 'admin') {
             // Pour les admins, accès limité aux demandes (seulement pour stats)
-            $demandes = DemandeConge::with(['user', 'type'])
-                ->select(['id', 'user_id', 'type_id', 'dateDebut', 'dateFin', 'statut', 'created_at'])
+            $demandes = DemandeConge::with(['user', 'conge.type'])
+                ->select(['id', 'user_id', 'conge_id', 'dateDebut', 'dateFin', 'statut', 'created_at'])
                 ->latest()
                 ->get();
         } else {
-            $demandes = DemandeConge::with(['type'])->where('user_id', $user->id)->latest()->get();
+            $demandes = DemandeConge::with(['conge.type'])->where('user_id', $user->id)->latest()->get();
         }
         
         return response()->json(['demandes' => $demandes]);
@@ -80,19 +81,27 @@ class CongeController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
         
+        // Créer d'abord le congé
+        $conge = Conge::create([
+            'titre' => Type::find($request->type_id)->libelle,
+            'type_id' => $request->type_id,
+            'dateCreation' => now(),
+        ]);
+        
         // Créer la demande
         $demande = new DemandeConge();
         $demande->user_id = Auth::id();
-        $demande->type_id = $request->type_id;
+        $demande->conge_id = $conge->idConge;
         $demande->dateDebut = $request->dateDebut;
         $demande->dateFin = $request->dateFin;
         $demande->motif = $request->motif;
         $demande->statut = 'en_attente';
+        $demande->dateDemande = now();
         $demande->save();
         
         // Si la requête est en AJAX, retourner la demande créée
         if ($request->ajax()) {
-            $demande->load(['user', 'type']);
+            $demande->load(['user', 'conge.type']);
             return response()->json(['demande' => $demande, 'message' => 'Demande de congé créée avec succès'], 201);
         }
         
@@ -108,7 +117,7 @@ class CongeController extends Controller
         $this->authorize('view', $demande);
         
         if (request()->ajax()) {
-            $demande->load(['user', 'type']);
+            $demande->load(['user', 'conge.type']);
             return response()->json(['demande' => $demande]);
         }
         
@@ -140,22 +149,30 @@ class CongeController extends Controller
         if (Auth::user()->role === 'rh' && $request->has('statut')) {
             $demande->statut = $request->statut;
             $demande->commentaire = $request->commentaire;
-            $demande->dateDebut = $request->dateDebut;
-            $demande->dateFin = $request->dateFin;
-
-        } 
-
-        // Si c'est le propriétaire qui modifie la demande
-        else if (Auth::id() === $demande->user_id && $demande->statut === 'en_attente') {
-            if ($request->has('type_id')) $demande->type_id = $request->type_id;
+            
             if ($request->has('dateDebut')) $demande->dateDebut = $request->dateDebut;
             if ($request->has('dateFin')) $demande->dateFin = $request->dateFin;
+        } 
+        // Si c'est le propriétaire qui modifie la demande
+        else if (Auth::id() === $demande->user_id && $demande->statut === 'en_attente') {
+            if ($request->has('type_id')) {
+                // Créer un nouveau congé avec le nouveau type
+                $conge = Conge::create([
+                    'titre' => Type::find($request->type_id)->libelle,
+                    'type_id' => $request->type_id,
+                    'dateCreation' => now(),
+                ]);
+                $demande->conge_id = $conge->idConge;
+            }
+            if ($request->has('dateDebut')) $demande->dateDebut = $request->dateDebut;
+            if ($request->has('dateFin')) $demande->dateFin = $request->dateFin;
+            if ($request->has('motif')) $demande->motif = $request->motif;
         }
         
         $demande->save();
         
         if ($request->ajax()) {
-            $demande->load(['user', 'type']);
+            $demande->load(['user', 'conge.type']);
             return response()->json(['demande' => $demande, 'message' => 'Demande mise à jour avec succès']);
         }
         
@@ -180,13 +197,13 @@ class CongeController extends Controller
         $services = Service::orderBy('nom')->get();
         
         // Récupérer les demandes en attente
-        $demandesEnAttente = DemandeConge::with(['user', 'type'])
+        $demandesEnAttente = DemandeConge::with(['user', 'conge.type'])
             ->where('statut', 'en_attente')
             ->latest()
             ->get();
             
         // Récupérer les demandes traitées récemment
-        $demandesTraitees = DemandeConge::with(['user', 'type'])
+        $demandesTraitees = DemandeConge::with(['user', 'conge.type'])
             ->whereIn('statut', ['approuvee', 'refusee'])
             ->latest()
             ->take(10)
@@ -242,31 +259,29 @@ class CongeController extends Controller
         // Validate the incoming request
         $validated = $request->validate([
             'service_id' => 'nullable|exists:services,id',
-            'type_id' => 'nullable|exists:type_conges,id',
+            'type_id' => 'nullable|exists:types,id',
             'statut' => 'nullable|in:en_attente,approuvee,refusee,annulee',
             'search' => 'nullable|string|max:255',
         ]);
 
         $userId = auth()->id();
         $user = auth()->user();
-        $isRH = $user->hasRole('rh');
-        $query = DemandeConge::with(['user.service', 'type'])
-            ->when($isRH, function ($query) {
-                // RH sees all requests
-                return $query;
-            })
+        $isRH = $user->role === 'rh';
+        
+        $query = DemandeConge::with(['user.service', 'conge.type'])
             ->when(!$isRH, function ($query) use ($userId) {
-
                 return $query->where('user_id', $userId);
             });
 
-            $query->when($request->filled('service_id'), function ($query) use ($request) {
+        $query->when($request->filled('service_id'), function ($query) use ($request) {
             return $query->whereHas('user.service', function ($q) use ($request) {
                 $q->where('id', $request->service_id);
             });
         })
         ->when($request->filled('type_id'), function ($query) use ($request) {
-            return $query->where('type_id', $request->type_id);
+            return $query->whereHas('conge', function ($q) use ($request) {
+                $q->where('type_id', $request->type_id);
+            });
         })
         ->when($request->filled('statut'), function ($query) use ($request) {
             return $query->where('statut', $request->statut);

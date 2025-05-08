@@ -33,33 +33,31 @@
         <form action="{{ route('hr.salaries.store') }}" method="POST" class="p-6" enctype="multipart/form-data">
             @csrf
             
-            <div class="mb-8">
-                <label for="photoProfile" class="block text-sm font-medium text-gray-700 mb-2">Photo de profil</label>
-                <div class="flex items-center">
-                    <div class="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mr-5 border-2 border-dashed border-gray-300" id="preview-container">
-                        <svg class="h-12 w-12 text-gray-400" id="default-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        <img id="preview-image" class="h-full w-full object-cover rounded-full hidden" src="#" alt="Preview">
-                    </div>
-                    <div class="flex-1">
-                        <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Choisir une photo
-                            <input type="file" id="photoProfile" name="photoProfile" accept="image/*" class="sr-only" onchange="previewImage()">
-                        </label>
-                        <p class="mt-2 text-sm text-gray-500">JPG, PNG ou GIF.</p>
-                    </div>
-                </div>
-            </div>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="col-span-full">
-                    <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">Informations personnelles</h3>
+                <!-- Photo de profil -->
+                <div class="md:col-span-2">
+                    <label for="photoProfile" class="block text-sm font-medium text-gray-700 mb-2">Photo de profil</label>
+                    <div class="flex items-center">
+                        <div class="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mr-5 border-2 border-dashed border-gray-300" id="preview-container">
+                            <svg class="h-12 w-12 text-gray-400" id="default-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <img id="preview-image" class="h-full w-full object-cover rounded-full hidden" src="#" alt="Preview">
+                        </div>
+                        <div class="flex-1">
+                            <label class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Choisir une photo
+                                <input type="file" id="photoProfile" name="photoProfile" accept="image/*" class="sr-only" onchange="previewImage()">
+                            </label>
+                            <p class="mt-2 text-sm text-gray-500">JPG, PNG ou GIF.</p>
+                        </div>
+                    </div>
                 </div>
-                
+
+                <!-- Nom -->
                 <div>
                     <label for="nom" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                     <div class="relative rounded-md shadow-sm">
@@ -73,6 +71,8 @@
                             required placeholder="Dupont">
                     </div>
                 </div>
+
+                <!-- Prénom -->
                 <div>
                     <label for="prenom" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
                     <div class="relative rounded-md shadow-sm">
@@ -86,7 +86,8 @@
                             required placeholder="Jean">
                     </div>
                 </div>
-                
+
+                <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <div class="relative rounded-md shadow-sm">
@@ -100,11 +101,8 @@
                             required placeholder="jean.dupont@entreprise.com">
                     </div>
                 </div>
-                
-                <div class="col-span-full pt-4">
-                    <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">Informations professionnelles</h3>
-                </div>
-                
+
+                <!-- Service -->
                 <div>
                     <label for="service_id" class="block text-sm font-medium text-gray-700 mb-1">Service</label>
                     <div class="relative rounded-md shadow-sm">
@@ -125,7 +123,8 @@
                         </select>
                     </div>
                 </div>
-                
+
+                <!-- Poste -->
                 <div>
                     <label for="poste" class="block text-sm font-medium text-gray-700 mb-1">Poste</label>
                     <div class="relative rounded-md shadow-sm">
@@ -139,7 +138,8 @@
                             required placeholder="Développeur">
                     </div>
                 </div>
-                
+
+                <!-- Date d'embauche -->
                 <div>
                     <label for="date_embauche" class="block text-sm font-medium text-gray-700 mb-1">Date d'embauche</label>
                     <div class="relative rounded-md shadow-sm">
@@ -153,11 +153,8 @@
                             required>
                     </div>
                 </div>
-                
-                <div class="col-span-full pt-4">
-                    <h3 class="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2 mb-4">Accès au compte</h3>
-                </div>
-                
+
+                <!-- Mot de passe -->
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
                     <div class="relative rounded-md shadow-sm">
@@ -177,7 +174,8 @@
                         <p class="mt-1 text-xs text-gray-500" id="password-strength-text">Entrez un mot de passe</p>
                     </div>
                 </div>
-                
+
+                <!-- Confirmation du mot de passe -->
                 <div>
                     <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirmer le mot de passe</label>
                     <div class="relative rounded-md shadow-sm">

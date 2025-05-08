@@ -11,17 +11,19 @@ class DemandeConge extends Model
     
     protected $fillable = [
         'user_id',
-        'type_id',
+        'conge_id',
         'dateDebut',
         'dateFin',
         'motif',
         'statut',
         'commentaire',
+        'dateDemande'
     ];
     
     protected $casts = [
         'dateDebut' => 'date',
         'dateFin' => 'date',
+        'dateDemande' => 'datetime'
     ];
     
     /**
@@ -33,11 +35,11 @@ class DemandeConge extends Model
     }
     
     /**
-     * Relation avec le type de congé demandé
+     * Relation avec le congé demandé
      */
-    public function type()
+    public function conge()
     {
-        return $this->belongsTo(Type::class);
+        return $this->belongsTo(Conge::class, 'conge_id', 'idConge');
     }
     
     /**

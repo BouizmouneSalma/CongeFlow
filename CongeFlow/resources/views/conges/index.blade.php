@@ -54,7 +54,7 @@
                             </td>
                             @endif
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $demande->type->libelle }}</div>
+                                <div class="text-sm text-gray-900">{{ $demande->conge->type->libelle }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $demande->dateDebut->format('d/m/Y') }} - {{ $demande->dateFin->format('d/m/Y') }}</div>
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const demande = data.demande;
             
             // Remplir les détails
-            document.getElementById('view-type').textContent = demande.type.libelle;
+            document.getElementById('view-type').textContent = demande.conge.type.libelle;
             document.getElementById('view-dates').textContent = `${formatDate(demande.dateDebut)} - ${formatDate(demande.dateFin)}`;
             document.getElementById('view-duree').textContent = `${calculateDuration(demande.dateDebut, demande.dateFin)} jour(s)`;
             document.getElementById('view-motif').textContent = demande.motif || 'Non spécifié';
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('edit-employee-fields').classList.remove('hidden');
                 document.getElementById('edit-admin-fields').classList.add('hidden');
                 
-                document.getElementById('edit-type').value = demande.type_id;
+                document.getElementById('edit-type').value = demande.conge.type_id;
                 document.getElementById('edit-date-debut').value = formatDateForInput(demande.dateDebut);
                 document.getElementById('edit-date-fin').value = formatDateForInput(demande.dateFin);
                 document.getElementById('edit-motif').value = demande.motif || '';
@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             html += `
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${demande.type.libelle}</div>
+                    <div class="text-sm text-gray-900">${demande.conge.type.libelle}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">${formatDate(demande.dateDebut)} - ${formatDate(demande.dateFin)}</div>

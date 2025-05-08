@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Mail\SendCredentials;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Arr;
 
 class SalarieController extends Controller
 {
@@ -40,57 +41,80 @@ class SalarieController extends Controller
      */
     public function store(SalarieRequest $request)
     {
-        // Préparer les données
-        $data = [
-            'nom' => $request->nom,
-            'prenom' => $request->prenom,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'salarie',
-            'status' => 'actif',
-            'service_id' => $request->service_id,
-            'dateInscription' => Carbon::now(),
-            'poste' => $request->poste,
-            'date_embauche' => $request->date_embauche,
-        ];
-        
-        // Gérer l'upload de photo de profil
-        if ($request->hasFile('photoProfile') && $request->file('photoProfile')->isValid()) {
-            try {
-                // Valider le fichier
-                $request->validate([
-                    'photoProfile' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-                ]);
-                
-                $file = $request->file('photoProfile');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                
-                // S'assurer que le répertoire existe
-                $path = 'profile-photos';
-                if (!Storage::disk('public')->exists($path)) {
-                    Storage::disk('public')->makeDirectory($path);
+        try {
+            \Log::info('Début de la création du salarié');
+            \Log::info('Données reçues:', $request->except(['password', 'password_confirmation']));
+
+            // Préparer les données
+            $data = [
+                'nom' => $request->nom,
+                'prenom' => $request->prenom,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'salarie',
+                'status' => 'actif',
+                'service_id' => $request->service_id,
+                'dateInscription' => Carbon::now(),
+                'poste' => $request->poste,
+                'date_embauche' => $request->date_embauche,
+            ];
+
+            \Log::info('Données préparées pour la création:', Arr::except($data, ['password']));
+            
+            // Gérer l'upload de photo de profil
+            if ($request->hasFile('photoProfile') && $request->file('photoProfile')->isValid()) {
+                try {
+                    // Valider le fichier
+                    $request->validate([
+                        'photoProfile' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+                    ]);
+                    
+                    $file = $request->file('photoProfile');
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    
+                    // S'assurer que le répertoire existe
+                    $path = 'profile-photos';
+                    if (!Storage::disk('public')->exists($path)) {
+                        Storage::disk('public')->makeDirectory($path);
+                    }
+                    
+                    // Stocker le fichier
+                    $filePath = $file->storeAs($path, $fileName, 'public');
+                    $data['photoProfile'] = $filePath;
+                    
+                    \Log::info('Photo uploaded: ' . $filePath);
+                } catch (\Exception $e) {
+                    \Log::error('Error uploading photo: ' . $e->getMessage());
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['photoProfile' => 'Erreur lors du téléchargement de la photo: ' . $e->getMessage()]);
                 }
-                
-                // Stocker le fichier
-                $filePath = $file->storeAs($path, $fileName, 'public');
-                $data['photoProfile'] = $filePath;
-                
-                // Pour le débogage
-                \Log::info('Photo uploaded: ' . $filePath);
-            } catch (\Exception $e) {
-                \Log::error('Error uploading photo: ' . $e->getMessage());
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['photoProfile' => 'Erreur lors du téléchargement de la photo: ' . $e->getMessage()]);
             }
+
+            // Créer le salarié
+            $salarie = User::create($data);
+            \Log::info('Salarié créé avec succès. ID: ' . $salarie->id);
+
+            // Envoyer l'email avec les identifiants
+            try {
+                Mail::to($salarie->email)->send(new SendCredentials($salarie->nom, $salarie->email, $request->password));
+                \Log::info('Email envoyé avec succès à: ' . $salarie->email);
+            } catch (\Exception $e) {
+                \Log::error('Erreur lors de l\'envoi de l\'email: ' . $e->getMessage());
+                // On continue même si l'email échoue
+            }
+
+            return redirect()->route('hr.salaries.index')
+                ->with('success', 'Salarié ajouté avec succès et email envoyé.');
+
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la création du salarié: ' . $e->getMessage());
+            \Log::error($e->getTraceAsString());
+            
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['general' => 'Une erreur est survenue lors de la création du salarié: ' . $e->getMessage()]);
         }
-
-        $salarie = User::create($data);
-
-        Mail::to($salarie->email)->send(new SendCredentials($salarie->nom, $salarie->email, $request -> password));
-
-        return redirect()->route('hr.salaries.index')
-            ->with('success', 'Salarié ajouté avec succès et email envoyé.');
     }
 
     public function edit(User $salarie)
